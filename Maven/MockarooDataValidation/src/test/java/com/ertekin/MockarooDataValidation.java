@@ -13,6 +13,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.Select;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -66,15 +67,40 @@ public class MockarooDataValidation {
 		assertEquals(driver.findElement(By.xpath("//div[@class='column column-header column-name']")).getText(), "Field Name");
 		assertEquals(driver.findElement(By.xpath("//div[@class='column column-header column-type']")).getText(), "Type");
 		assertEquals(driver.findElement(By.xpath("//div[@class='column column-header column-options']")).getText(), "Options");
-		//TASK #7
+		//TASK #7 Add another field
 		assertTrue(driver.findElement(By.xpath("//a[@class='btn btn-default add-column-btn add_nested_fields']")).isEnabled());
-		//TASK #8
+		//TASK #8 Assert that default number of rows is 1000
 		assertEquals(driver.findElement(By.xpath("//input[@value='1000']")).getAttribute("value"), "1000");
-		//TASK #9
+		//TASK #9 Assert that default format selection is CSV 
 		assertEquals(driver.findElement(By.xpath("//select[@data-action='file_format']")).getAttribute("value"), "csv");
-		//TASK #10
-		assertEquals(driver.findElement(By.xpath("//select[@name='schema[line_ending]']")).getAttribute("value"), "unix");
+		String str = driver.findElement(By.xpath("//select[@data-action='file_format']")).getAttribute("value");
+		
+		Select select = new Select(driver.findElement(By.xpath("//select[@data-action='file_format']")));
+		String actual  = select.getFirstSelectedOption().getText();
+		String expected = "CSV";
+		assertEquals(actual, expected);
 
+		
+		
+		//TASK #10 Assert that Line Ending is Unix(LF) 
+		assertEquals(driver.findElement(By.xpath("//select[@name='schema[line_ending]']")).getAttribute("value"), "unix");
+		Select select2 = new Select(driver.findElement(By.xpath("//select[@id='schema_line_ending']")));
+		assertEquals(select2.getFirstSelectedOption().getText(), "Unix (LF)");
+
+		//TASK #11  Assert that header checkbox is checked and BOM is unchecked
+		assertTrue(!driver.findElement(By.xpath("//input[@id='schema_bom']")).isSelected());
+		
+		
+		//TASK #12 Click on ‘Add another field’ and enter name “City”
+		driver.findElement(By.xpath("//a[@class='btn btn-default add-column-btn add_nested_fields']")).click();
+		driver.findElement(By.xpath(
+			"(//div[@id='fields']//input[starts-with(@id, 'schema_columns_attributes_')][contains(@id,'name')])[last()]"))
+				.sendKeys("City");
+		
+		
+		driver.findElement(By.xpath("//input[@value='Row Number']")).getClass();
+		driver.findElement(By.xpath("//input[@value='Row Number']")).click();
+		
 		
 	}
 	
