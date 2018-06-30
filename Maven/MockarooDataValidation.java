@@ -1,58 +1,43 @@
-package com.mockaroo;
+package com.ertekin;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.Select;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import com.opencsv.CSVReader;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class MockarooDataValidation {
 
 	WebDriver driver;
-	BufferedReader br;
-	List<String> cities = new ArrayList<>();
-	List<String> countries = new ArrayList<>();
+	List<String> lst = new ArrayList<>();
 
 	@BeforeClass
 	public void setup() {
+
 		WebDriverManager.chromedriver().setup();
 		driver = new ChromeDriver();
-		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-		driver.manage().window().fullscreen();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 		driver.get("https://mockaroo.com/");
-	}
 
-	@AfterClass
-	public void tearDown() throws InterruptedException {
-		Thread.sleep(5000);
-		driver.quit();
 	}
 
 	@BeforeMethod
@@ -60,275 +45,156 @@ public class MockarooDataValidation {
 
 	}
 
-	@AfterMethod
-	public void afterMethod() {
-
+	// @Test
+	public void Test3() {
+		String actual = driver.getTitle();
+		driver.findElement(By.xpath("//div[@class='brand']")).getText();
+		String expected = "Mockaroo - Random Data Generator and API Mocking Tool | JSON / CSV / SQL / Excel";
+		assertEquals(actual, expected);
 	}
 
-	@Test(priority = 1)
-	public void step3() {
-		String expectedTitle = "Mockaroo - Random Data Generator and API Mocking Tool | JSON / CSV / SQL / Excel";
-		assertEquals(driver.getTitle(), expectedTitle);
-	}
-
-	@Test(priority = 2)
-	public void step4() {
-		WebElement exp1 = driver.findElement(By.xpath("//div[@class='navbar-header']//div[@class='brand']"));
-		WebElement exp2 = driver.findElement(By.xpath("//div[@class='navbar-header']//div[@class='tagline']"));
-
-		// assert that elements are displayed
-		assertTrue(exp1.isDisplayed());
-		assertTrue(exp2.isDisplayed());
-
-		// assert that elements contain expected text
-		assertEquals("mockaroo", exp1.getText());
-		assertEquals("realistic data generator", exp2.getText());
-	}
-
-	@Test(priority = 3)
-	public void step5_6() {
-		// STEP 5
-		// select all x buttons next to fields
-		List<WebElement> xButtons = driver
-				.findElements(By.xpath("//div[@id='fields']//a[@class='close remove-field remove_nested_fields']"));
-
-		// click on all x buttons to clear fields
-		for (WebElement each : xButtons) {
-			each.click();
-		}
-
-		// STEP 6
-		// find elements for Field Name, Type and Options
-		WebElement fieldName = driver.findElement(By.xpath("//div[@class='column-fields']//div[.='Field Name']"));
-		WebElement fieldType = driver.findElement(By.xpath("//div[@class='column-fields']//div[.='Type']"));
-		WebElement fieldOptions = driver.findElement(By.xpath("//div[@class='column-fields']//div[.='Options']"));
-
-		assertTrue(fieldName.isDisplayed());
-		assertTrue(fieldType.isDisplayed());
-		assertTrue(fieldOptions.isDisplayed());
-	}
-
-	@Test(priority = 4)
-	public void step7() {
-		WebElement addAnotherButton = driver.findElement(By.partialLinkText("Add another field"));
-		assertTrue(addAnotherButton.isEnabled());
+	// @Test
+	public void Test4() {
+		String a = driver.findElement(By.xpath("//div[@class='brand']")).getText();
+		String b = driver.findElement(By.xpath("//div[@class='tagline']")).getText();
+		assertEquals(a + " " + b, "mockaroo" + " " + "realistic data generator");
 	}
 
 	@Test
-	public void step8() {
-		String actual = driver.findElement(By.id("num_rows")).getAttribute("value");
-		String expected = "1000";
+	public void Test5() throws InterruptedException {
 
-		assertEquals(actual, expected);
+		// TASK#5 Remote all existing fields by clicking on x icon link
+		List<WebElement> elements = driver
+				.findElements(By.xpath("//a[@class='close remove-field remove_nested_fields']"));
+
+		for (WebElement webElement : elements) {
+			webElement.click();
+		}
+
+		// TASK#6 Assert that ‘Field Name’ , ‘Type’, ‘Options’ labels are displayed
+		assertEquals(driver.findElement(By.xpath("//div[@class='column column-header column-name']")).getText(),
+				"Field Name");
+		assertEquals(driver.findElement(By.xpath("//div[@class='column column-header column-type']")).getText(),
+				"Type");
+		assertEquals(driver.findElement(By.xpath("//div[@class='column column-header column-options']")).getText(),
+				"Options");
+
+		// TASK#7 Assert that ‘Add another field’ button is enabled.
+		assertTrue(driver.findElement(By.xpath("//a[@class='btn btn-default add-column-btn add_nested_fields']"))
+				.isEnabled());
+
+		// TASK #8 Assert that default number of rows is 1000.
+		assertEquals(driver.findElement(By.xpath("//input[@value='1000']")).getAttribute("value"), "1000");
+
+		// TASK#9 Assert that default format selection is CSV
+		assertEquals(driver.findElement(By.xpath("//select[@data-action='file_format']")).getAttribute("value"), "csv");
+
+		// TASK#10 Assert that Line Ending is Unix(LF)
+		assertEquals(driver.findElement(By.xpath("//select[@name='schema[line_ending]']")).getAttribute("value"),
+				"unix");
+
+		// TASK#11 Assert that header checkbox is checked and BOM is unchecked
+		assertTrue(driver.findElement(By.xpath("//input[@id='schema_include_header']")).isSelected());
+		assertTrue(!driver.findElement(By.xpath("//input[@id='schema_bom']")).isSelected());
 	}
 
-	@Test(priority = 5)
-	public void step9() {
-		// choose and create new Select object
-		Select select = new Select(driver.findElement(By.id("schema_file_format")));
-
-		// get the text from the chosen option in Select object
-		String actual = select.getFirstSelectedOption().getText();
-		String expected = "CSV";
-
-		assertEquals(actual, expected);
-
-		// if you want to store all options under select and want to choose a specific
-		// option
-		// List<WebElement> selectOptions = select.getOptions();
-		// for (WebElement each : selectOptions) {
-		// if(each.getText().equals("SQL")) {
-		// each.click();
-		// }
-		// }
-	}
-
-	@Test(priority = 6)
-	public void step10() {
-		// choose and create new Select object
-		Select select = new Select(driver.findElement(By.id("schema_line_ending")));
-
-		// get the text from the chosen option in Select object
-		String actual = select.getFirstSelectedOption().getText();
-		String expected = "Unix (LF)";
-
-		assertEquals(actual, expected);
-	}
-
-	@Test(priority = 7)
-	public void step11() {
-		WebElement headerChkbx = driver.findElement(By.id("schema_include_header"));
-		WebElement bomChkbx = driver.findElement(By.id("schema_bom"));
-
-		assertTrue(headerChkbx.isSelected());
-		assertFalse(bomChkbx.isSelected());
-	}
-
-	@Test(priority = 8)
-	public void step12_13() {
-		// STEP 12
-		// click on Add Another Field button
-		driver.findElement(By.partialLinkText("Add another field")).click();
-
-		// this input has dynamic id changing on every page load
-		driver.findElement(By.xpath(
-				"(//div[@id='fields']//input[starts-with(@id, 'schema_columns_attributes_')][contains(@id,'name')])[last()]"))
+	@Test
+	public void Test6() throws InterruptedException {
+		// TASK#12 & 13 Click on ‘Add another field’ and enter name “City”
+		driver.findElement(By.xpath("//a[@class='btn btn-default add-column-btn add_nested_fields']")).click();
+		driver.findElement(By.xpath("(//div[@class='fields']//input[@placeholder='enter name...'])[last()]"))
 				.sendKeys("City");
+		driver.findElement(By.xpath("(//input[@class='btn btn-default'])[last()]")).click();
 
-		// STEP 13
+		Thread.sleep(1000);
+		assertEquals(driver.findElement(By.xpath("//h3[contains(text(),'Choose a Type')]")).getText(), "Choose a Type");
 
-		// click on chooose type button
-		driver.findElement(By.xpath("(//div[@class='fields']//input[@class='btn btn-default'])[last()]")).click();
+		// TASK#13 Click on ‘Add another field’ and enter name “City”
 
-		WebElement dialogBox = driver.findElement(By.xpath("//div[@id='type_dialog']"));
-		// attribute aria-hidden returns string "true" or "false". then convert it to
-		// boolan with Boolean.valueOf()
-		assertFalse(Boolean.valueOf(dialogBox.getAttribute("aria-hidden")));
-	}
+		driver.findElement(By.xpath("//input[@id='type_search_field']")).sendKeys("City");
+		driver.findElement(By.xpath("//div[@class='examples']")).click();
 
-	@Test(priority = 9)
-	public void step14_15_16() throws InterruptedException {
-		// STEP 14
-		driver.findElement(By.id("type_search_field")).sendKeys("city");
-		driver.findElement(By.xpath("//div[@id='type_list']//div[.='City']")).click();
+		// TASK#15 Click on ‘Add another field’ and enter name “City”
+
 		Thread.sleep(1000);
 
-		// STEP 15
-		// click on Add Another Field button
-		driver.findElement(By.partialLinkText("Add another field")).click();
-		Thread.sleep(1000);
-		// this input has dynamic id changing on every page load
-		driver.findElement(By.xpath(
-				"(//div[@id='fields']//input[starts-with(@id, 'schema_columns_attributes_')][contains(@id,'name')])[last()]"))
+		driver.findElement(By.xpath("//a[@class='btn btn-default add-column-btn add_nested_fields']")).click();
+
+		driver.findElement(By.xpath("(//div[@class='fields']//input[@placeholder='enter name...'])[last()]"))
 				.sendKeys("Country");
+		driver.findElement(By.xpath("(//input[@class='btn btn-default'])[last()]")).click();
+
 		Thread.sleep(1000);
-		// click on chooose type button
-		driver.findElement(By.xpath("(//div[@class='fields']//input[@class='btn btn-default'])[last()]")).click();
+		assertEquals(driver.findElement(By.xpath("//h3[contains(text(),'Choose a Type')]")).getText(), "Choose a Type");
+
+		driver.findElement(By.xpath("//input[@id='type_search_field']")).sendKeys("Country");
+		driver.findElement(By.xpath("//div[@class='examples']")).click();
 		Thread.sleep(1000);
 
-		driver.findElement(By.id("type_search_field")).clear();
-		Thread.sleep(1000);
-		driver.findElement(By.id("type_search_field")).sendKeys("country");
-		Thread.sleep(1000);
-		driver.findElement(By.xpath("//div[@id='type_list']//div[.='Country']")).click();
-		Thread.sleep(1000);
-
-		// STEP 16
-		// click on download button
-		driver.findElement(By.id("download")).click();
 	}
 
-	@Test(priority = 10)
-	public void step17_18() throws InterruptedException {
-		// try with resources
-		Thread.sleep(5000);
-		String filePath = "C:\\Users\\arslan\\Downloads\\MOCK_DATA.csv";
-		// try (BufferedReader br = new BufferedReader(new FileReader(filePath));) {
-		// String line = "";
-		// while ((line = br.readLine()) != null)
-		// data = Arrays.asList(line.split(","));
-		// } catch (Exception e) {
-		// System.out.println("File could not be found");
-		// }
+	@Test
+	public void Test7() {
 
-		// STEP 21 & 22 are included here
-		try (FileInputStream fis = new FileInputStream(filePath);
-				InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
-				CSVReader reader = new CSVReader(isr)) {
-			String[] nextLine;
+		driver.findElement(By.xpath("//button[@id='download']")).click();
 
-			while ((nextLine = reader.readNext()) != null) {
-				boolean isCity = true;
-				for (String e : nextLine) {
-					if (isCity) {
-						cities.add(e);
-					} else {
-						countries.add(e);
-					}
-					isCity = !isCity;
-				}
+		try (FileReader fr = new FileReader("/Users/ertekinkoc/Downloads/MOCK_DATA.csv");
+				BufferedReader br = new BufferedReader(fr);) {
+
+			String s = null;
+			while ((s = br.readLine()) != null) {
+
+				lst.add(s);
 			}
-		} catch (IOException e) {
-			System.out.println("File Not Found");
+
+			assertEquals(lst.get(0), "City,Country");
+			assertEquals(lst.size() - 1, 1000);
+
+			System.out.println(lst.get(0));
+			System.out.println(lst.get(1));
+			System.out.println(lst.size());
+
+		} catch (Exception e) {
+			System.err.println(
+					"File Not Found, please check your file at C:\\Users\\Technoline\\Downloads\\MOCK_DATA.csv ");
 		}
 
-		// STEP 18
-		assertEquals("City", cities.get(0));
-		assertEquals("Country", countries.get(0));
-
-		// STEP 19
-		assertEquals(1000, cities.size() - 1);
 	}
 
-	@Test(priority = 11)
-	public void step22() {
-		// STEP 22
+	@Test
+	public void Test8() {
+
+		List<String> cities = new ArrayList<>();
+		List<String> countries = new ArrayList<>();
+
+		for (String each : lst) {
+			String[] a = each.split(",");
+			cities.add(a[0]);
+			countries.add(a[1]);
+		}
+
+		cities.remove(0);
+		countries.remove(0);
+
 		Collections.sort(cities);
+		Collections.sort(countries);
 
-		int min = cities.get(0).length();
-		int max = cities.get(0).length();
-
-		String cityShort = "";
-		String cityLongest = "";
-
-		for (String city : cities) {
-			if (city.length() > max) {
-				max = city.length();
-				cityLongest = city;
-			}
-
-			if (city.length() < min) {
-				min = city.length();
-				cityShort = city;
-			}
-		}
-
-		System.out.println("Shortest named city: " + "\t" + cityShort);
-		System.out.println("Longest named city: " + "\t" + cityLongest);
-
-		// STEP 23
-		SortedSet<String> sortedCountry = new TreeSet<>(countries);
-
-		for (String country : sortedCountry) {
-			System.out.println(country + ":\t" + Collections.frequency(countries, country));
-		}
-
-		// STEP 24
-
-		Set<String> citiesSet = new HashSet<>(cities);
-
-		// STEP 25
-		int uniqueCityCount = 0;
-
-		for (int i = 0; i < cities.size(); i++) {
-			if (i == cities.lastIndexOf(cities.get(i)))
-				uniqueCityCount++;
-		}
-
-		System.out.println("Unique city count by for loop: " + uniqueCityCount);
-		System.out.println("Unique city count by HashSet: " + citiesSet.size());
-
-		assertEquals(uniqueCityCount, citiesSet.size());
-	}
-
-	@Test(priority = 12)
-	public void step26_27() {
-		// STEP 26
-		Set<String> countrySet = new HashSet<>(countries);
-
+		int longest = 0;
+		int shortest = 100;
 		
-		// STEP 27
-		int uniqueCountryCount = 0;
-
-		for (int i = 0; i < countries.size(); i++) {
-			if (i == countries.lastIndexOf(countries.get(i)))
-				uniqueCountryCount++;
+		for (String each : cities) {
+			if (each.length()>longest) longest = each.length();
+			if (each.length()<shortest) shortest = each.length();
 		}
 
-		System.out.println("Unique country count by for loop: " + uniqueCountryCount);
-		System.out.println("Unique country count by HashSet: " + countrySet.size());
 
-		assertEquals(uniqueCountryCount, countrySet.size());
 	}
 
+	
+	
+	
+	@AfterClass
+	public void afterClass() {
+		// driver.close();
+	}
 }
