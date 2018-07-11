@@ -1,7 +1,8 @@
-/target/
+target/
 .settings
 .project
 .classpath
+<<<<<<< HEAD
 /test-output/
 
 
@@ -114,3 +115,6 @@ buildNumber.properties
 
 
 # End of https://www.gitignore.io/api/java,maven,eclipse
+=======
+/test-output
+>>>>>>> d4b3fa57ce066f24cdea0dbef7403f864a33b07e
